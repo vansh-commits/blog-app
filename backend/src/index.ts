@@ -18,12 +18,14 @@ app.put('/api/v1/blog', (c) => {
   return c.text('/api/v1/blog')
 })
 
+app.get('/api/v1/blog/bulk', (c) => {
+  return c.text('/api/v1/blog/bulk')
+})
+
 app.get('/api/v1/blog/:id', (c) => {
   return c.text('/api/v1/blog/:id')
 })
 
-app.get('/api/v1/blog/bulk', (c) => {
-  return c.text('/api/v1/blog/bulk')
-})
+
 
 export default app
