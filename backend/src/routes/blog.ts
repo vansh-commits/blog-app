@@ -19,10 +19,12 @@ type JwtPayLoad = {
 
 blogRouter.use('/*', async (c, next) =>{
     const token = c.req.header("authorization")?.split(" ")[1] || "";
+    // console.log(token)
     const res  = await verify(token, c.env.JWT_SECRET) as JwtPayLoad;
     if(res){
         c.set("userId", res.id)
-        next()
+        // console.log("authorized")
+        return next()
     }else{
         c.status(403)
         return c.json({error: "unauthorised"})
@@ -30,7 +32,7 @@ blogRouter.use('/*', async (c, next) =>{
   
 })
 
-blogRouter.post('/', async (c) => {
+blogRouter.post('/newblog', async (c) => {
     try{
         const body = await c.req.json();
         const authorId = c.get("userId")
@@ -47,18 +49,19 @@ blogRouter.post('/', async (c) => {
         })
 
         return c.json({
-            id: blog.id
+            blog_id: blog.id
         })
 
     }catch(error){
+        console.log(error)
         return c.text(`Internal Server Error: ${(error as Error).message}`, 500)
     }
     
 
     
-  })
+})
   
-blogRouter.put('/', async (c) => {
+blogRouter.put('/update', async (c) => {
     try{
         const body = await c.req.json();
         const prisma = new PrismaClient({
@@ -76,7 +79,7 @@ blogRouter.put('/', async (c) => {
         })
 
         return c.json({
-            id: blog.id
+            blog_id: blog.id
         })
 
     }catch(error){
@@ -86,7 +89,6 @@ blogRouter.put('/', async (c) => {
   
 blogRouter.get('/bulk', async(c) => {
     try{
-        const body = await c.req.json();
         const prisma = new PrismaClient({
             datasourceUrl: c.env.DATABASE_URL
         }).$extends(withAccelerate())
@@ -110,16 +112,17 @@ blogRouter.get('/:id', async (c) => {
 
         const blog = await prisma.post.findFirst({
             where: {
-                id: c.req.query('id')
+                id: c.req.param("id")
             }
         })
+        console.log(blog)
 
         if(!blog){
             return c.text("blog not found")
         }
 
         return c.json({
-            id: blog.id
+            blog
         })
 
     }catch(error){

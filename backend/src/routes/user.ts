@@ -15,13 +15,33 @@ userRouter.post('/signup', async (c)  => {
       const prisma = new PrismaClient({
         datasourceUrl: c.env.DATABASE_URL,
       }).$extends(withAccelerate())
-    
+
+      
       const body = await c.req.json();
+      const name = body.name || null;
+      const email = body.email;
+      const password = body.password;
+
+      if(!email || !password){
+        c.status(401);
+        return c.text("enter valid credentials")
+      }
+
+      const exist = await prisma.user.findFirst({
+        where: {
+          email
+        }
+      })
+
+      if(exist){
+        c.status(409);
+        return c.text("user already exist")
+      }
       const user = await prisma.user.create({
         data: {
-          name: body.name || null,
-          email : body.email,
-          password: body.password
+          name,
+          email,
+          password
         },
         select: {
           id: true,
@@ -46,18 +66,28 @@ userRouter.post('/signin', async (c) => {
       const prisma = new PrismaClient({
         datasourceUrl: c.env.DATABASE_URL,
       }).$extends(withAccelerate())
+
     
       const body = await c.req.json();
+
+      const email = body.email
+      const password = body.password;
+
+      if(!email || !password){
+        c.status(401);
+        return c.text("enter valid credentials")
+      }
+
       const user = await prisma.user.findUnique({
         where:{
-          email: body.email,
-          password: body.password
+          email
         },
         select: {
-          id: true
+          id: true,
+          password: true
         }
       })
-      if(!user){
+      if(!user || user.password != password){
         c.status(403);
         return c.text("wrong email or password")
       }
