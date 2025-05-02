@@ -22,7 +22,7 @@ export const useBlog = ({ id }: { id: string }) => {
                 Authorization: `Bearer: ${localStorage.getItem("token")}`
             }
         })
-            .then(response => {
+            .then((response : any) => {
                 setBlog(response.data.blog);
                 setLoading(false);
             })
@@ -44,7 +44,7 @@ export const useBlogs = () => {
                 Authorization: `Bearer: ${localStorage.getItem("token")}`
             }
         })
-            .then(response => {
+            .then((response : any) => {
                 setBlogs(response.data.blog);
                 setLoading(false);
             })
